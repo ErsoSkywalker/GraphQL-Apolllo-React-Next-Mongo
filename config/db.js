@@ -8,7 +8,11 @@ const conectarDB = async () =>{
     try{
         //Usamos una conexión con el ORM, debo investigar que es await
         await mongoose.connect(process.env.DB_MONGO, {
-
+            //Investigar todo esto
+            useNewUrlParser: true,
+            useUnifiedTopology : true,
+            useFindAndModify : false,
+            useCreateIndex : true
         });
         console.log('Lo logramos');
     }catch(error){
