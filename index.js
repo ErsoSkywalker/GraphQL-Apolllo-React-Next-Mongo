@@ -3,14 +3,30 @@ const { ApolloServer, gql } = require('apollo-server');
 const typeDefs = require('./db/schema');
 const resolvers = require('./db/resolvers')
 const conectarDB = require('./config/db');
-
+const jwt = require('jsonwebtoken');
+require('dotenv').config({path : 'variables.env'});
 //Acá ya conectamos a la DB
 conectarDB();
 
 //Le damos al Apollo Server la configuración Necesaria
 const server = new ApolloServer({
     typeDefs,
-    resolvers
+    resolvers,
+    context:({req})=>{
+        const token = req.headers['authorization'] || '';
+        if(token){
+
+            try {
+                const user = jwt.verify(token,process.env.SECRETA);
+                return {
+                    user
+                }
+            } catch (error) {
+                console.log(error);
+            }
+
+        }
+    }
 });
 
 //Empezamos la App

@@ -4,6 +4,7 @@ const { ApolloServer} = require('apollo-server');
 //Importamos los modelos
 const Usuario = require('../models/usuarios');
 const Producto = require('../models/Producto');
+const Cliente = require('../models/Clientes');
 //Vamos a importar el bcrypt para por Hashear las passwords
 const bcryptjs = require('bcryptjs');
 //Importamos variables de entorno
@@ -108,6 +109,21 @@ const resolvers = {
             if(!existeProducto){throw new Error('No hay Productos con ese Id');} 
             await Producto.findByIdAndDelete({ _id : id });
             return "Producto Eliminado";
+       },
+       nuevoCliente : async (_,{ input }, ctx)=>{
+           const {email} = input;
+            const existeCliente = await Cliente.findOne({email});
+            if(existeCliente){throw new Error('Ya existe un cliente con ee correo');}
+            const cliente = new Cliente(input);
+            cliente.vendedor = ctx.user.id;
+            try{
+                const nuevocliente = await cliente.save();
+                return nuevocliente;
+            }catch(error){
+                console.log(error);
+            }
+            
+
        }
    }
 }
