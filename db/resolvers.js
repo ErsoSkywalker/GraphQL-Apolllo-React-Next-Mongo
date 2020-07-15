@@ -38,6 +38,15 @@ const resolvers = {
            }catch(error){
                console.log(error);
            }
+       },
+       obtenerProductosById : async(_,{id})=>{
+            const existeProducto = await Producto.findById(id);
+            if(!existeProducto){throw new Error('No hay Productos con ese Id');} 
+            try {
+                return existeProducto;
+            } catch (error) {
+                console.log(error);
+            }
        }
    },
    Mutation : {
@@ -85,6 +94,20 @@ const resolvers = {
            } catch (error) {
                console.log(error);
            }
+       },
+       actualizarProducto : async (_,{id, input})=>{
+            const existeProducto = await Producto.findById(id);
+            if(!existeProducto){throw new Error('No hay Productos con ese Id');} 
+
+            producto = await Producto.findByIdAndUpdate({_id : id}, input, {new : true});
+
+            return producto;
+       },
+       eliminarProducto : async(_,{id})=>{
+            const existeProducto = await Producto.findById(id);
+            if(!existeProducto){throw new Error('No hay Productos con ese Id');} 
+            await Producto.findByIdAndDelete({ _id : id });
+            return "Producto Eliminado";
        }
    }
 }
