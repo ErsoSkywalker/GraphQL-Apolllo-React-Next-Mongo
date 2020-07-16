@@ -48,6 +48,33 @@ const resolvers = {
             } catch (error) {
                 console.log(error);
             }
+       },
+       obtenerClientes : async()=>{
+           try {
+               const clientes = await Cliente.find({});
+               return clientes;
+           } catch (error) {
+               console.log(error);
+           }
+       },
+       obtenerClientesByVendedor : async(_, {}, ctx)=>{
+           try {
+               const clientes = await Cliente.find({vendedor : ctx.user.id.toString()});
+               return clientes;
+           } catch (error) {
+               console.log(error)
+           }
+       },
+       obtenerClientesById : async(_,{id},ctx)=>{
+            
+                const existeCliente = await Cliente.findById(id);
+                if(!existeCliente){throw new Error('Ese cliente no existe');}
+                if(ctx.user.id.toString() !== existeCliente.vendedor){throw new Error('No tienes las credenciales');}
+            try {
+                return existeCliente;
+            } catch (error) {
+                console.log(error)
+            }
        }
    },
    Mutation : {
@@ -100,7 +127,7 @@ const resolvers = {
             const existeProducto = await Producto.findById(id);
             if(!existeProducto){throw new Error('No hay Productos con ese Id');} 
 
-            producto = await Producto.findByIdAndUpdate({_id : id}, input, {new : true});
+            const producto = await Producto.findByIdAndUpdate({_id : id}, input, {new : true});
 
             return producto;
        },
@@ -113,7 +140,7 @@ const resolvers = {
        nuevoCliente : async (_,{ input }, ctx)=>{
            const {email} = input;
             const existeCliente = await Cliente.findOne({email});
-            if(existeCliente){throw new Error('Ya existe un cliente con ee correo');}
+            if(existeCliente){throw new Error('Ya existe un cliente con ese correo');}
             const cliente = new Cliente(input);
             cliente.vendedor = ctx.user.id;
             try{
@@ -121,10 +148,41 @@ const resolvers = {
                 return nuevocliente;
             }catch(error){
                 console.log(error);
+            }  
+       },
+       actualizarCliente : async(_,{ id, input} ,ctx)=>{
+            const cliente = await Cliente.findById(id);
+            if(!cliente){throw new Error('Ese cliente no existe en la base de datos');}
+            if(ctx.user.id!==cliente.vendedor.toString()){throw new Error('No tienes las credenciales');}
+            const {email} = input;
+            const validarClienteEmail = await Cliente.findOne({email});
+            if(validarClienteEmail.id !== id && validarClienteEmail){throw new Error('Ya existe alguien con ese email');}
+            try {
+                const clienteretro = await Cliente.findByIdAndUpdate({_id : id},input, {new : true} );
+                return clienteretro;
+            } catch (error) {
+                console.log(error);
             }
+        },
+        eliminarCliente : async(_, {id} , ctx) => {
+            const cliente = await Cliente.findById(id);
+            if(!cliente){throw new Error('Ese cliente no existe en la base de datos');}
+            if(ctx.user.id!==cliente.vendedor.toString()){throw new Error('No tienes las credenciales');}
+            try{
+                await Cliente.findOneAndDelete({_id : id});
+                return "Se ha eliminado con éxito";
+            }catch(error){
+                console.log(error);
+            }
+        },
+        insertarPedido : async(_, {input}, ctx)=>{
+            const {cliente} = input;
+            const clienteExiste = await Cliente.findById(cliente);
+            if(!clienteExiste){throw new Error('Ese cliente no existe en la base de datos');}
+            if(ctx.user.id!==clienteExiste.vendedor.toString()){throw new Error('No tienes las credenciales');}
             
 
-       }
+        }
    }
 }
 
