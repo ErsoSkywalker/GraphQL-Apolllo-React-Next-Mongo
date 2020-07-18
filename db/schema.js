@@ -50,7 +50,7 @@ const typeDefs = gql`
     }
 
     type PedidoGrupo{
-        id : ID!
+        id : ID
         cantidad : Int
     }
 
@@ -62,6 +62,16 @@ const typeDefs = gql`
         vendedor : ID
         creado : String
         estado : EstadoPedido
+    }
+
+    type TopCliente{
+        total : Float
+        cliente : [Cliente]
+    }
+
+    type TopVendedor{
+        total : Float
+        vendedor : [Usuario]
     }
 
     type Token{
@@ -82,7 +92,7 @@ const typeDefs = gql`
         existencia : Int!
     }
 
-    input AutenticarInput{
+    input AutenticarInput{ 
         email : String!
         password : String!
     }
@@ -106,6 +116,18 @@ const typeDefs = gql`
         obtenerClientes : [Cliente]
         obtenerClientesByVendedor: [Cliente]
         obtenerClientesById(id : ID!) : Cliente
+        #Pedidos 
+        obtenerPedidos : [Pedido]
+        obtenerPedidosByVendedor : [Pedido]
+        obtenerPedidosByCliente(id : ID!) : [Pedido]
+        obtenerPedidoById(id : ID!) : Pedido
+        obtenerPedidosByState(estado : String!) : [Pedido]
+
+        #Consultas pesadas
+
+        obtenerMejoresClientes : [TopCliente]
+        obtenerMejoresVendedores : [TopVendedor]
+        buscarProducto( texto : String! ) : [Producto]
     }
 
     type Mutation{
@@ -123,6 +145,8 @@ const typeDefs = gql`
         eliminarCliente(id : ID!) : String
         #Insertar Pedidos
         insertarPedido(input : PedidoInput!) : Pedido
+        actualizarPedido(id : ID!, input : PedidoInput!) : Pedido
+        eliminarPedido(id : ID!) : String
     }
 
 `;
